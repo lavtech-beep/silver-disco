@@ -11,7 +11,17 @@ import communities from '../utils/communities';
 
 function HomePage() {
     const navigate = useNavigate();
-    const { listings: featuredListings } = useFoodListings({ status: 'approved', limit: 6 });
+    const { listings: allListings } = useFoodListings({ status: 'approved' });
+
+    // Get featured listings (first 6)
+    const featuredListings = allListings.slice(0, 6);
+
+    // Get listings count per community based on school_district
+    const getListingsCountForCommunity = (communityName) => {
+        return allListings.filter(listing =>
+            listing.school_district === communityName
+        ).length;
+    };
     
     try {
         const foodCategories = [
@@ -279,49 +289,58 @@ function HomePage() {
                                 role="list"
                                 aria-label="Active communities"
                             >
-                                {communities.map((community) => (
-                                    <Card
-                                        key={community.id}
-                                        className="overflow-hidden"
-                                        role="listitem"
-                                        hoverable={true}
-                                        onClick={() => handleNavigation(`/community/${community.id}`)}
-                                    >
-                                        <img
-                                            src={community.image}
-                                            alt={`${community.name} community`}
-                                            className="w-full h-64 object-cover"
-                                        />
-                                        <div className="p-4">
-                                            <h3 className="text-base font-semibold truncate mb-2">{community.name}</h3>
-                                            <div className="flex items-start text-xs text-gray-700 mb-1.5">
-                                                <i className="fas fa-map-marker-alt w-4 text-center mr-2 mt-0.5 text-gray-500"></i>
-                                                <span>{community.location}</span>
+                                {communities.map((community) => {
+                                    const listingsCount = getListingsCountForCommunity(community.name);
+                                    return (
+                                        <Card
+                                            key={community.id}
+                                            className="overflow-hidden"
+                                            role="listitem"
+                                            hoverable={true}
+                                            onClick={() => handleNavigation(`/community/${community.id}`)}
+                                        >
+                                            <img
+                                                src={community.image}
+                                                alt={`${community.name} community`}
+                                                className="w-full h-64 object-cover"
+                                            />
+                                            <div className="p-4">
+                                                <h3 className="text-base font-semibold truncate mb-2">{community.name}</h3>
+                                                <div className="flex items-start text-xs text-gray-700 mb-1.5">
+                                                    <i className="fas fa-map-marker-alt w-4 text-center mr-2 mt-0.5 text-gray-500"></i>
+                                                    <span>{community.location}</span>
+                                                </div>
+                                                <div className="flex items-start text-xs text-gray-700 mb-1.5">
+                                                    <i className="fas fa-user w-4 text-center mr-2 mt-0.5 text-gray-500"></i>
+                                                    <span>Contact: {community.contact}</span>
+                                                </div>
+                                                <div className="flex items-start text-xs text-gray-700 mb-1.5">
+                                                    <i className="fas fa-clock w-4 text-center mr-2 mt-0.5 text-gray-500"></i>
+                                                    <span>Hours: {community.hours}</span>
+                                                </div>
+                                                <div className="flex items-start text-xs text-gray-700 mb-2">
+                                                    <i className="fas fa-utensils w-4 text-center mr-2 mt-0.5 text-green-500"></i>
+                                                    <span className="font-semibold text-green-600">
+                                                        {listingsCount} {listingsCount === 1 ? 'listing' : 'listings'} available
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center mt-3 pt-2 border-t">
+                                                    <a href={`tel:${community.phone}`} className="text-sm text-blue-600 hover:underline">
+                                                        {community.phone}
+                                                    </a>
+                                                    <Button
+                                                        variant="primary"
+                                                        size="sm"
+                                                        onClick={() => handleNavigation(`/community/${community.id}`)}
+                                                        aria-label={`Join ${community.name}`}
+                                                    >
+                                                        Join
+                                                    </Button>
+                                                </div>
                                             </div>
-                                            <div className="flex items-start text-xs text-gray-700 mb-1.5">
-                                                <i className="fas fa-user w-4 text-center mr-2 mt-0.5 text-gray-500"></i>
-                                                <span>Contact: {community.contact}</span>
-                                            </div>
-                                            <div className="flex items-start text-xs text-gray-700 mb-2">
-                                                <i className="fas fa-clock w-4 text-center mr-2 mt-0.5 text-gray-500"></i>
-                                                <span>Hours: {community.hours}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center mt-3 pt-2 border-t">
-                                                <a href={`tel:${community.phone}`} className="text-sm text-blue-600 hover:underline">
-                                                    {community.phone}
-                                                </a>
-                                                <Button
-                                                    variant="primary"
-                                                    size="sm"
-                                                    onClick={() => handleNavigation(`/community/${community.id}`)}
-                                                    aria-label={`Join ${community.name}`}
-                                                >
-                                                    Join
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </Card>
-                                ))}
+                                        </Card>
+                                    );
+                                })}
                             </div>
 
                             <div className="text-center">

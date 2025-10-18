@@ -15,18 +15,13 @@ export default function CommunityFoodPage() {
 
     const { listings: foods, loading, error, fetchListings } = useFoodListings({ status: 'approved' });
 
-    // Filter foods by community - assume food.location or donor_city contains community name or id
-    // We'll use a simple heuristic: check listing.donor_city or listing.location.address for community name
+    // Filter foods by community based on school_district field
     const communityFoods = useMemo(() => {
         if (!foods) return [];
         if (!community) return [];
-        const nameLower = community.name.toLowerCase();
-        return foods.filter(f => {
-            const city = (f.donor_city || '') + ' ' + (f.donor_state || '');
-            const loc = f.location && f.location.address ? f.location.address : '';
-            return (city.toLowerCase().includes(nameLower) || loc.toLowerCase().includes(nameLower) || (f.community_id && f.community_id === communityId));
-        });
-    }, [foods, community, communityId]);
+        // Match listings where school_district exactly matches the community name
+        return foods.filter(f => f.school_district === community.name);
+    }, [foods, community]);
 
     if (!community) {
         return (
